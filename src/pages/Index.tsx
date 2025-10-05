@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { CalculatorInput } from "@/components/CalculatorInput";
 import { ResultCard } from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
@@ -114,19 +113,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Calculator className="h-8 w-8 text-primary" />
-              Calculadora de Importação
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Calcule custos de importação para o Brasil
-            </p>
-          </div>
-          <ThemeToggle />
-        </header>
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8">
@@ -376,8 +362,7 @@ const Index = () => {
         {/* Footer */}
         <footer className="mt-12 text-center text-sm text-muted-foreground">
           <p>
-            Calculadora de Importação Simplificada • Valores aproximados para fins de
-            estimativa
+            Versão Simplificada • Valores aproximados para fins de estimativa
           </p>
         </footer>
       </div>
