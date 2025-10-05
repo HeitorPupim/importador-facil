@@ -8,6 +8,7 @@ interface ResultCardProps {
   value: string;
   tooltip?: string;
   highlight?: boolean;
+  compact?: boolean;
 }
 
 export function ResultCard({
@@ -16,25 +17,28 @@ export function ResultCard({
   value,
   tooltip,
   highlight = false,
+  compact = false,
 }: ResultCardProps) {
   return (
     <Card
       className={`transition-all hover:shadow-md ${
         highlight ? "border-primary bg-primary/5" : ""
-      }`}
+      } ${compact ? "border-transparent shadow-none" : ""}`}
     >
-      <CardContent className="p-4">
+      <CardContent className={compact ? "p-3" : "p-4"}>
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <p className="text-sm font-medium text-muted-foreground flex items-center">
-              <Icon className="h-4 w-4 mr-2" />
+            <p className={`font-medium text-muted-foreground flex items-center ${
+              compact ? "text-xs" : "text-sm"
+            }`}>
+              <Icon className={`mr-2 ${compact ? "h-3 w-3" : "h-4 w-4"}`} />
               {label}
               {tooltip && <InfoTooltip content={tooltip} />}
             </p>
             <p
-              className={`text-2xl font-bold ${
-                highlight ? "text-primary" : ""
-              }`}
+              className={`font-bold ${
+                compact ? "text-base" : "text-2xl"
+              } ${highlight ? "text-primary" : ""}`}
             >
               {value}
             </p>

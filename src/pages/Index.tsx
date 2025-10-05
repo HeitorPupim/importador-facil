@@ -4,6 +4,11 @@ import { CalculatorInput } from "@/components/CalculatorInput";
 import { ResultCard } from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   calculateImportCosts,
@@ -23,6 +28,8 @@ import {
   Wallet,
   Target,
   ShoppingCart,
+  ChevronDown,
+  Receipt,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,6 +54,7 @@ const Index = () => {
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isRulesOpen, setIsRulesOpen] = useState(true);
 
   const updateField = (field: keyof FormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -253,34 +261,47 @@ const Index = () => {
             </Card>
 
             {/* Regras de Cálculo */}
-            <Card className="bg-muted/50">
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Regras de Cálculo
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs space-y-2 text-muted-foreground">
-                <p>
-                  <strong>Subtotal:</strong> (Mercadoria + Frete) × Câmbio
-                </p>
-                <p>
-                  <strong>II:</strong> Subtotal × 60%
-                </p>
-                <p>
-                  <strong>Base ICMS:</strong> (Subtotal + II) ÷ (1 − ICMS%)
-                </p>
-                <p>
-                  <strong>ICMS:</strong> Base ICMS × ICMS%
-                </p>
-                <p>
-                  <strong>Taxa Adm:</strong> (Subtotal + II + ICMS) × Taxa%
-                </p>
-                <p>
-                  <strong>Total:</strong> Subtotal + II + ICMS + Taxa Adm
-                </p>
-              </CardContent>
-            </Card>
+            <Collapsible open={isRulesOpen} onOpenChange={setIsRulesOpen}>
+              <Card className="bg-muted/50">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/70 transition-colors">
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Regras de Cálculo
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          isRulesOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </CardTitle>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="text-xs space-y-2 text-muted-foreground pt-0">
+                    <p>
+                      <strong>Subtotal:</strong> (Mercadoria + Frete) × Câmbio
+                    </p>
+                    <p>
+                      <strong>II:</strong> Subtotal × 60%
+                    </p>
+                    <p>
+                      <strong>Base ICMS:</strong> (Subtotal + II) ÷ (1 − ICMS%)
+                    </p>
+                    <p>
+                      <strong>ICMS:</strong> Base ICMS × ICMS%
+                    </p>
+                    <p>
+                      <strong>Taxa Adm:</strong> (Subtotal + II + ICMS) × Taxa%
+                    </p>
+                    <p>
+                      <strong>Total:</strong> Subtotal + II + ICMS + Taxa Adm
+                    </p>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </div>
 
           {/* Coluna Direita - Resultados */}
@@ -307,37 +328,53 @@ const Index = () => {
                       tooltip="Valor total da mercadoria + frete convertido para BRL"
                     />
 
-                    <ResultCard
-                      icon={TrendingUp}
-                      label="Imposto de Importação (60%)"
-                      value={formatCurrency(results!.ii, "BRL")}
-                      tooltip="Imposto de Importação fixo de 60% sobre o subtotal"
-                    />
+                    <div className="space-y-2 pl-4 border-l-2 border-muted">
+                      <ResultCard
+                        icon={TrendingUp}
+                        label="Imposto de Importação (60%)"
+                        value={formatCurrency(results!.ii, "BRL")}
+                        tooltip="Imposto de Importação fixo de 60% sobre o subtotal"
+                        compact
+                      />
+
+                      <ResultCard
+                        icon={FileText}
+                        label="Base do ICMS"
+                        value={formatCurrency(results!.baseIcms, "BRL")}
+                        tooltip="Base de cálculo do ICMS com gross-up"
+                        compact
+                      />
+
+                      <ResultCard
+                        icon={TrendingUp}
+                        label={`ICMS (${formatPercent(calculationInputs.icmsPercent)})`}
+                        value={formatCurrency(results!.icms, "BRL")}
+                        tooltip="ICMS calculado sobre a base com gross-up"
+                        compact
+                      />
+
+                      <ResultCard
+                        icon={Truck}
+                        label={`Taxa Administrativa (${formatPercent(
+                          calculationInputs.taxaAdmPercent
+                        )})`}
+                        value={formatCurrency(results!.taxaAdm, "BRL")}
+                        tooltip="Taxa administrativa aplicada sobre os custos"
+                        compact
+                      />
+                    </div>
 
                     <ResultCard
-                      icon={FileText}
-                      label="Base do ICMS"
-                      value={formatCurrency(results!.baseIcms, "BRL")}
-                      tooltip="Base de cálculo do ICMS com gross-up"
+                      icon={Receipt}
+                      label="Impostos + Taxas"
+                      value={formatCurrency(
+                        results!.ii + results!.icms + results!.taxaAdm,
+                        "BRL"
+                      )}
+                      tooltip="Soma de II + ICMS + Taxa Administrativa"
                     />
 
-                    <ResultCard
-                      icon={TrendingUp}
-                      label={`ICMS (${formatPercent(calculationInputs.icmsPercent)})`}
-                      value={formatCurrency(results!.icms, "BRL")}
-                      tooltip="ICMS calculado sobre a base com gross-up"
-                    />
-
-                    <ResultCard
-                      icon={Truck}
-                      label={`Taxa Administrativa (${formatPercent(
-                        calculationInputs.taxaAdmPercent
-                      )})`}
-                      value={formatCurrency(results!.taxaAdm, "BRL")}
-                      tooltip="Taxa administrativa aplicada sobre os custos"
-                    />
-
-                    <div className="pt-3 border-t">
+                    <div className="pt-3 border-t-2 border-primary/20">
                       <ResultCard
                         icon={DollarSign}
                         label="Total (BRL)"
