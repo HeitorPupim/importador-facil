@@ -107,7 +107,8 @@ const Index = () => {
     formState.freteUsd &&
     formState.icmsPercent &&
     formState.taxaAdmPercent &&
-    validateForm();
+    Object.keys(errors).length === 0 &&
+    parseNumber(formState.cambio) > 0;
 
   const calculationInputs: CalculationInputs = {
     cambio: parseNumber(formState.cambio),
