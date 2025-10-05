@@ -12,12 +12,18 @@ interface InfoTooltipProps {
 
 export function InfoTooltip({ content }: InfoTooltipProps) {
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Info className="h-4 w-4 text-muted-foreground cursor-help inline-block ml-1" />
+          <span
+            tabIndex={0}
+            aria-label={content}
+            className="inline-flex items-center ml-1 cursor-help align-middle"
+          >
+            <Info className="h-4 w-4 text-muted-foreground" />
+          </span>
         </TooltipTrigger>
-        <TooltipContent className="max-w-xs">
+        <TooltipContent className="max-w-xs" side="top" align="center">
           <p className="text-sm">{content}</p>
         </TooltipContent>
       </Tooltip>

@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+ 
 import {
   calculateImportCosts,
   formatCurrency,
@@ -21,7 +21,7 @@ import {
   DollarSign,
   Truck,
   Package,
-  RefreshCw,
+  
   Calculator,
   TrendingUp,
   FileText,
@@ -31,7 +31,7 @@ import {
   ChevronDown,
   Receipt,
 } from "lucide-react";
-import { toast } from "sonner";
+ 
 
 interface FormState {
   cambio: string;
@@ -43,7 +43,7 @@ interface FormState {
 }
 
 const Index = () => {
-  const [formState, setFormState] = useLocalStorage<FormState>("import_calc_data", {
+  const [formState, setFormState] = useState<FormState>({
     cambio: "",
     mercadoriaUsd: "",
     freteUsd: "",
@@ -52,7 +52,7 @@ const Index = () => {
     taxaAdmPercent: "3",
   });
 
-  const [loading, setLoading] = useState(false);
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isRulesOpen, setIsRulesOpen] = useState(true);
 
@@ -86,43 +86,25 @@ const Index = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const fetchExchangeRate = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        "https://api.exchangerate.host/latest?base=USD&symbols=BRL"
-      );
-      const data = await response.json();
-
-      if (data.rates && data.rates.BRL) {
-        const rate = data.rates.BRL.toFixed(2);
-        updateField("cambio", rate);
-        toast.success(`Câmbio atualizado: ${rate}`);
-      } else {
-        toast.error("Falha ao obter taxa de câmbio");
-      }
-    } catch (error) {
-      toast.error("Erro ao conectar com API de câmbio");
-      console.error("Exchange rate fetch error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const isFormValid =
     formState.cambio &&
     formState.mercadoriaUsd &&
-    formState.freteUsd &&
     formState.icmsPercent &&
     formState.taxaAdmPercent &&
     Object.keys(errors).length === 0 &&
     parseNumber(formState.cambio) > 0;
 
+  const qtyStr = formState.quantidade;
+  const qtyParsed = qtyStr ? parseNumber(qtyStr) : 0;
+  const normalizedQty = qtyStr === "" ? 0 : qtyParsed === 0 ? 1 : qtyParsed;
+
   const calculationInputs: CalculationInputs = {
     cambio: parseNumber(formState.cambio),
     mercadoriaUsd: parseNumber(formState.mercadoriaUsd),
     freteUsd: parseNumber(formState.freteUsd),
-    quantidade: formState.quantidade ? parseNumber(formState.quantidade) : 1,
+    quantidade: normalizedQty,
     icmsPercent: parseNumber(formState.icmsPercent),
     taxaAdmPercent: parseNumber(formState.taxaAdmPercent),
   };
@@ -172,14 +154,6 @@ const Index = () => {
                       min={0}
                     />
                   </div>
-                  <Button
-                    onClick={fetchExchangeRate}
-                    disabled={loading}
-                    className="mt-8"
-                    size="icon"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                  </Button>
                 </div>
 
                 <CalculatorInput
@@ -384,7 +358,7 @@ const Index = () => {
                       />
                     </div>
 
-                    {calculationInputs.quantidade >= 1 && (
+                    {formState.quantidade !== "" && calculationInputs.quantidade >= 1 && (
                       <ResultCard
                         icon={ShoppingCart}
                         label="Custo Unitário (BRL)"
